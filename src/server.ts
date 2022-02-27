@@ -9,6 +9,8 @@ import mongoose from "mongoose";
 
 // import route handlers
 import v1 from "./v1";
+import { generateResponse } from "./v1/utilities/responses";
+import { ResponseStatuses } from "./v1/types/types";
 
 // bring in environment variables
 dotenv.config();
@@ -51,6 +53,40 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/v1", v1);
+
+app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+    if (!error) {
+        return next()
+    }
+
+    const errorResponse = {
+        code: error.statusCode,
+        message: error.message
+    }
+    
+    return res.status(errorResponse.code)
+                .json(
+                    generateResponse(
+                        ResponseStatuses["f"],
+                        errorResponse.message
+                    )
+                );
+});
+
+app.use((req: any, res: Response, next: NextFunction) => {
+    const response = {
+        code: req.statusCode || 200,
+        message: req.message || 'success'
+    }
+
+    return res.status(response.code)
+                .json(
+                    generateResponse(
+                        ResponseStatuses["s"],
+                        response.message
+                    )
+                );
+});
 
 async function startApp(): Promise<void> {
     try {

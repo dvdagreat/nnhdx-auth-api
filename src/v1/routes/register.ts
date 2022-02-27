@@ -3,7 +3,7 @@ import { IResponse, ResponseStatuses } from "../types/types";
 import { validateRegister } from "../validators";
 import User from "../../database/models/user.model";
 import bcrypt from "bcryptjs";
-import { generateResponse } from "../functions/responses";
+import { generateResponse } from "../utilities/responses";
 
 export async function register(req: Request, res: Response) {
     // check for user data in request

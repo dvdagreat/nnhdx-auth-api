@@ -1,14 +1,14 @@
 import { Router, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { IResponse, ResponseStatuses } from "./types/types";
-import { generateResponse } from "./functions/responses";
-import { login } from "./routes/login";
+import { generateResponse } from "./utilities/responses";
+import { router as LoginRoute } from "./routes/login";
 import { register } from "./routes/register";
 
 const router = Router();
 
 // @route: login route
-router.post("/login", login);
+router.use("/login", LoginRoute);
 
 // @route: register route
 router.post("/register", register);
