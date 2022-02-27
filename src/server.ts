@@ -23,6 +23,16 @@ function JsonBodyParseExceptionHandler(
     res: Response,
     next: NextFunction
 ) {
+    // check if request body is in application/json
+    if(!req.is('application/json')) {
+        const response = {
+            status: "failure",
+            message: "Content-Type should be set to application/json",
+        };
+        return res.send(response);
+    }
+
+    // check if json body is in proper format
     middleware(req, res, (err: any) => {
         if (err) {
             const response = {
