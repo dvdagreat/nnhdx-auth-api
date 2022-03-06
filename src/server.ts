@@ -1,69 +1,14 @@
-import express, {
-    Application,
-    Request,
-    Response,
-    NextFunction,
-} from "express";
-import * as dotenv from "dotenv";
-import mongoose from "mongoose";
+// vendor imports
 
-// import route handlers
-import v1 from "./v1";
+// custom imports
+import getApp from "@src/app";
+import database from "@database/index";
 
-// bring in environment variables
-dotenv.config();
+// config app
+const app = getApp({ database });
+const PORT: string | number = process.env.NNHDX_AUTH_PORT! || 5002;
 
-const app: Application = express();
-const PORT: string = process.env.NNHDX_AUTH_PORT!;
-const DB_HOST: string = process.env.DB_HOST!;
-
-function JsonBodyParseExceptionHandler(
-    middleware: any,
-    req: Request,
-    res: Response,
-    next: NextFunction
-) {
-    // check if request body is in application/json
-    if(!req.is('application/json')) {
-        const response = {
-            status: "failure",
-            message: "Content-Type should be set to application/json",
-        };
-        return res.send(response);
-    }
-
-    // check if json body is in proper format
-    middleware(req, res, (err: any) => {
-        if (err) {
-            const response = {
-                status: "failure",
-                message: "Improper JSON body",
-            };
-            return res.send(response);
-        }
-        next();
-    });
-}
-
-// to check if proper json body is sent in request
-app.use((req: Request, res: Response, next: NextFunction) => {
-    JsonBodyParseExceptionHandler(express.json(), req, res, next);
+// run app
+app.listen(PORT, () => {
+    console.log("Auth API server has started on port " + PORT);
 });
-
-app.use("/v1", v1);
-
-async function startApp(): Promise<void> {
-    try {
-        await mongoose.connect(DB_HOST);
-        console.log(
-            "Auth API has successfully established connection to the database"
-        );
-        app.listen(PORT, () => {
-            console.log("Auth API server has started on port " + PORT);
-        });
-    } catch (err) {
-        console.log("AUTH API DB error: cannot start server. " + err);
-    }
-}
-
-startApp();

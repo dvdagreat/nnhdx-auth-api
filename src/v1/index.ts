@@ -1,48 +1,34 @@
-import { Router, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { IResponse, ResponseStatuses } from "./types/types";
-import { generateResponse } from "./functions/responses";
-import { login } from "./routes/login";
-import { register } from "./routes/register";
+// vendor imports
+import { Router, Request, Response, NextFunction } from "express";
 
-const router = Router();
+// custom imports
+import LoginController from "@v1/library/LoginController";
+import RegisterController from "@v1/library/RegisterController";
+import VerifyController from "@v1/library/VerifyController";
+import RefreshController from "@v1/library/RefreshController";
 
-// @route: login route
-router.post("/login", login);
+export default function v1(dependencies: any) {
+    const router = Router();
 
-// @route: register route
-router.post("/register", register);
+    // login route
+    router.post("/login", (req: Request, res: Response, next: NextFunction) => {
+        LoginController.route(req, res, next, dependencies);
+    });
 
-// @route: refresh token
-router.post("/refreshToken", (req: Request, res: Response) => {});
+    // register route
+    router.post("/register", (req: Request, res: Response, next: NextFunction) => {
+        RegisterController.route(req, res, next, dependencies);
+    });
 
-// @route: verify token
-router.post("/verify", (req: Request, res: Response) => {
-    const token = req.body.token;
-    try {
-        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
-        const response: IResponse = {
-            status: ResponseStatuses["s"],
-            message: "This token is valid",
-        };
-        return res
-            .status(200)
-            .json(
-                generateResponse(
-                    ResponseStatuses["s"],
-                    "This token is valid"
-                ) as IResponse
-            );
-    } catch (err) {
-        return res
-            .status(400)
-            .json(
-                generateResponse(
-                    ResponseStatuses["f"],
-                    "This token is invalid"
-                ) as IResponse
-            );
-    }
-});
+    // refresh token
+    router.post("/refreshToken", (req: Request, res: Response, next: NextFunction) => {
+        RefreshController.route(req, res, next, dependencies);
+    });
 
-export default router;
+    // verify token
+    router.post("/verify", (req: Request, res: Response, next: NextFunction) => {
+        VerifyController.route(req, res, next, dependencies);
+    });
+
+    return router;
+}
